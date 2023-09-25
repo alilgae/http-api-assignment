@@ -11,7 +11,7 @@ const sendResponse = (request, response, status, type, content) => {
   response.end();
 };
 
-const handler = (request, response, value, type) => {
+const handler = (request, response, value, type, query) => {
   let statusCode = 404;
   const responseJSON = {
     message: 'This is a successful response',
@@ -23,21 +23,25 @@ const handler = (request, response, value, type) => {
       break;
 
     case '/badRequest':
-      // 400
-      responseJSON.message = 'Missing valid querey parameter set to true.';
-      responseJSON.id = 'badRequest';
-      statusCode = 400;
-      // 200
-      statusCode = 200;
+      if (query.valid === 'true') {
+        statusCode = 200;
+      } else {
+        // 400
+        responseJSON.message = 'Missing valid query parameter set to true.';
+        responseJSON.id = 'badRequest';
+        statusCode = 400;
+      }
       break;
 
     case '/unauthorized':
-      // 401
-      responseJSON.message = 'Missing loggedIn querey parameter set to yes.';
-      responseJSON.id = 'unathorized';
-      statusCode = 401;
-      // 200
-      statusCode = 200;
+      if (query.loggedIn === 'yes') {
+        statusCode = 200;
+      } else {
+        // 401
+        responseJSON.message = 'Missing loggedIn query parameter set to yes.';
+        responseJSON.id = 'unathorized';
+        statusCode = 401;
+      }
       break;
 
     case '/forbidden':

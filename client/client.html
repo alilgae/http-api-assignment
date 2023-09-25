@@ -6,7 +6,7 @@
   
   <script>
     const handleResponse = async (response) => {
-      
+      response.text().then((responseText) =>{
       //Grab the content section
       const content = document.querySelector('#content');
 
@@ -27,7 +27,7 @@
         default: //any other status code
           content.innerHTML = `Error code not implemented by client.`;
           break;
-      }
+      }});
 
       //Parse the response to json. This works because we know the server always
       //sends back json. Await because .json() is an async function.
@@ -37,10 +37,31 @@
       if(obj.message){
         content.innerHTML += `<p>${obj.message}</p>`;
       }
-    };
+    }
 
-    
+    const sendFetchRequest = (url, type) => {
+      console.log("send");
+      console.log(url);
+      console.log(type);
+      const options = {
+        method: 'GET',
+        headers: {'Accept': type || 'application/json'},
+      };
 
+      const fetchPromise = fetch(url, options);
+      fetchPromise.then((response) => { handleResponse(response) });
+
+    }
+    const init = () => {
+      const button = document.querySelector("#send");
+      const page = document.querySelector("#page");
+      const type = document.querySelector("#type");
+
+      const send = () => sendFetchRequest(page.value, type.value);
+      button.addEventListener('click', send);
+    }
+
+    window.onload = init;
   </script>
 </head>
 <body>
