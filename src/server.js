@@ -8,8 +8,8 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const urlStruct = {
 
-    '/': htmlHandler.getIndex,
-    '/style.css': htmlHandler.getCSS,
+  '/': htmlHandler.getIndex,
+  '/style.css': htmlHandler.getCSS,
 };
 
 const onRequest = (request, response) => {
@@ -20,7 +20,7 @@ const onRequest = (request, response) => {
     return urlStruct[parsedUrl.pathname](request, response);
   }
 
-  return handler.handler(request, response, parsedUrl.pathname, 'application/json', params);
+  return handler.handler(request, response, parsedUrl.pathname, request.headers.accept.split(',')[0], params);
 };
 
 http.createServer(onRequest).listen(port, () => {

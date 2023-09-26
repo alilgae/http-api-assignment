@@ -6,8 +6,10 @@ const toXML = (messageJSON) => {
 };
 
 const sendResponse = (request, response, status, type, content) => {
-  response.writeHead(status, { 'Content-Type': type });
-  response.write(type === 'application/json' ? JSON.stringify(content) : toXML(content));
+  let acceptedType = type;
+  if (type === 'text/html') acceptedType = 'application/json';
+  response.writeHead(status, { 'Content-Type': acceptedType });
+  response.write(acceptedType === 'application/json' ? JSON.stringify(content) : toXML(content));
   response.end();
 };
 

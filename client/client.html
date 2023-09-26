@@ -6,8 +6,9 @@
   
   <script>
     const handleResponse = async (response) => {
-      response.text().then((responseText) =>{
+      // response.text().then((responseText) =>{
       //Grab the content section
+      // console.log(responseText)
       const content = document.querySelector('#content');
 
       //Based on the status code, display something
@@ -15,31 +16,47 @@
         case 200: //success
           content.innerHTML = `<b>Success</b>`;
           break;
-        case 201: //created
-          content.innerHTML = '<b>Created</b>';
-          break;
-        case 204: //updated (no response back from server)
-          content.innerHTML = '<b>Updated (No Content)</b>';
-          return;
         case 400: //bad request
           content.innerHTML = `<b>Bad Request</b>`;
           break;
-        default: //any other status code
-          content.innerHTML = `Error code not implemented by client.`;
-          break;
-      }});
 
-      //Parse the response to json. This works because we know the server always
-      //sends back json. Await because .json() is an async function.
-      let obj = await response.json();
+        case 401: //unauth
+          content.innerHTML = `<b>Unauthorized</b>`;
+          break;
+
+        case 403: //forbidden
+          content.innerHTML = `<b>Forbidden</b>`;
+          break;
+
+        case 500: //internal
+          content.innerHTML = `<b>Internal Server Error</b>`;
+          break;
+
+        case 501: //any other status code
+          content.innerHTML = `<b>Not Implemented</b>`;
+          break;
+
+        default:
+          content.innerHTML = `<b>Resource Not Found</b>`;
+          break;
+      };
+
+      response.text().then((resText) => {
+      let message;
       
+      const contentType = response.headers.get('Content-Type');
+
+      if(contentType === 'application/json') message = JSON.parse(resText).message;
+      else if (contentType === 'text/xml') message = new window.DOMParser().parseFromString(resText, 'text/xml').querySelector("message").textContent;
+
       //If we have a message, display it.
-      if(obj.message){
-        content.innerHTML += `<p>${obj.message}</p>`;
+      if(message){
+        content.innerHTML += `<p>${message}</p>`;
       }
+      });
     }
 
-    const sendFetchRequest = (url, type) => {
+    const sendFetchRequest = async (url, type) => {
       console.log("send");
       console.log(url);
       console.log(type);
@@ -48,16 +65,16 @@
         headers: {'Accept': type || 'application/json'},
       };
 
-      const fetchPromise = fetch(url, options);
-      fetchPromise.then((response) => { handleResponse(response) });
+      const fetchPromise = fetch(url, options)
+        .then((response) => { handleResponse(response) });
 
     }
-    const init = () => {
+    const init = async () => {
       const button = document.querySelector("#send");
       const page = document.querySelector("#page");
       const type = document.querySelector("#type");
 
-      const send = () => sendFetchRequest(page.value, type.value);
+      const send = async () => await sendFetchRequest(page.value, type.value);
       button.addEventListener('click', send);
     }
 
